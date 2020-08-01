@@ -42,6 +42,7 @@ essential_packages:
     - compton-tryone-git
     - nerd-fonts-source-code-pro
     - polybar
+    - starship-bin
   custom:
     - dmenu
     - slock
