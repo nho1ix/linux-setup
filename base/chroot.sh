@@ -57,6 +57,10 @@ sed -i 's/^#Color/Color/g;/#\[multilib\]/,/#Include/ s/^#//g' /etc/pacman.conf
 sed -i '33 a\ILoveCandy' /etc/pacman.conf
 pacman -Syy
 
+# Makepkg
+sed -i 's/-march=x86_64 -mtune=generic/-march=native/g' /etc/makepkg.conf
+sed -i 's/^#MAKEFLAGS="-j2"/MAKEFLAGS="-j$(nproc)"/g' /etc/makepkg.conf
+
 # Users
 echo "ROOT PASSWORD"
 passwd

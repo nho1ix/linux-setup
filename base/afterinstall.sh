@@ -1,6 +1,5 @@
 #!/bin/sh
 
-sudo pacman -S xorg-server --noconfirm
 git clone https://github.com/nho1ix/dotfiles.git
 git clone https://aur.archlinux.org/yay.git
 cd yay
