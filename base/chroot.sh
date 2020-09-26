@@ -76,5 +76,11 @@ ln -s /usr/bin/vim /usr/bin/vi
 vim /boot/loader/entries/arch.conf
 
 # Cleanup
+cd /home/"$username"
+if [[ ! -f afterinstall.sh ]]; then
+    echo "Missing afterinstall.sh, downloading..."
+    curl -O https://raw.githubusercontent.com/nho1ix/linux-setup/master/base/afterinstall.sh
+fi
+chmod +x afterinstall.sh
 rm /chroot.sh
 exit

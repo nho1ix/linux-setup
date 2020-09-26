@@ -2,13 +2,13 @@
 
 home: "{{ ansible_env.HOME }}"
 
-dotfiles_repo: "https://github.com/khuedoan/dotfiles.git"
+dotfiles_repo: "https://github.com/nho1ix/dotfiles.git"
 
 wallpaper_url: "https://i.imgur.com/C3tCYsp.jpg"
 wallpaper_dir: "{{ home }}/Pictures/Wallpapers/"
 wallpaper_path: "{{ wallpaper_dir }}/OneDarkBlur.jpg"
 
-aur_helper: trizen
+aur_helper: yay
 
 essential_packages:
   official:
