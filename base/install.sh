@@ -15,6 +15,7 @@ source ./config.sh
 # +------------------+
 
 # Update the system clock
+echo 'Syncing system clock'
 timedatectl set-ntp true
 
 # Partition the disk
@@ -43,17 +44,21 @@ lsblk
 sleep 5
 
 # Format the boot partition
+printf "Formatting $boot_partition"
 mkfs.fat -F32 "$boot_partition"
 
 # Set up encryption
+echo 'Setting up encryption'
 modprobe dm-crypt dm-mod
 cryptsetup luksFormat -v -s 512 -h sha512 "$root_partition"
 cryptsetup open "$root_partition" encrypted
 
 # Format encrypted partition
+printf "Formatting $encrypted_partition"
 mkfs.ext4 "$encrypted_partition"
 
 # Mount the file systems
+echo 'Mounting Partitions'
 mount "$encrypted_partition" /mnt
 mkdir /mnt/boot
 mount "$boot_partition" /mnt/boot
@@ -63,6 +68,7 @@ mount "$boot_partition" /mnt/boot
 # +--------------+
 
 # Select the mirrors
+echo 'Sorting mirrorlist (5 fastest mirrors)'
 pacman -Syy
 pacman --noconfirm --needed -S pacman-contrib
 cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
@@ -79,6 +85,7 @@ pacstrap /mnt base linux linux-firmware base-devel linux-headers alsa-utils capi
 # +----------------------+
 # | Configure the system |
 # +----------------------+
+echo 'Generating fstab'
 genfstab -U /mnt >> /mnt/etc/fstab
 if [[ ! -f chroot.sh ]]; then
     echo "Missing chroot.sh, downloading..."
