@@ -98,5 +98,5 @@ if [[ ! -f afterinstall.sh ]]; then
 fi
 chmod +x afterinstall.sh
 rm /chroot.sh
-echo 'The install has finished. I will exit now.'
+echo 'The installation has finished. VARBs will be in your user's home directory. Please run the VARBs script after rebooting. I will exit now'
 exit
