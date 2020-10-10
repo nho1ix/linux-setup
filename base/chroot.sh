@@ -1,10 +1,47 @@
 #+-------------------------+
 #| Configuration in chroot |
 #+-------------------------+
-# Essential packages
-pacman --noconfirm -S $ucode networkmanager git vifm
 
-# Swap
+# +-----------+
+# | Functions |
+# +-----------+
+
+e_boot() {
+   if [ "$bootloader" = "systemd-boot" ]; then
+        bootctl --path=/boot install
+        echo 'default arch.conf' > /boot/loader/loader.conf
+        echo 'console-mode auto' >> /boot/loader/loader.conf
+        echo 'timeout 0' >> /boot/loader/loader.conf
+        echo 'editor  0' >> /boot/loader/loader.conf
+        echo 'title   Arch Linux' > /boot/loader/entries/arch.conf
+        echo 'linux   /vmlinuz-linux' >> /boot/loader/entries/arch.conf
+        [ -n "$ucode" ] && echo "initrd  /$ucode.img" >> /boot/loader/entries/arch.conf
+        echo 'initrd  /initramfs-linux.img' >> /boot/loader/entries/arch.conf
+        echo "options rd.luks.name=[regular UUID here]=encrypted root=UUID=[encrypted UUID here] rw nowatchdog quiet" >> /boot/loader/entries/arch.conf
+   elif [ "$bootloader" = "efistub" ]; then
+        [ -n "$ucode" ] && ucode_init="initrd=/$ucode.img"
+        efibootmgr -d $disk -p 1 -c -L "Arch Linux" -l /vmlinuz-linux -u "$ucode_init initrd=/initramfs-linux.img root=$root_partition rw quiet" -v
+   fi
+}
+
+ne_boot() {
+if [ "$bootloader" = "systemd-boot" ]; then
+     bootctl --path=/boot install
+     echo 'default arch' > /boot/loader/loader.conf
+     echo 'timeout 0' >> /boot/loader/loader.conf
+     echo 'editor  0' >> /boot/loader/loader.conf
+     echo 'title   Arch Linux' > /boot/loader/entries/arch.conf
+     echo 'linux   /vmlinuz-linux' >> /boot/loader/entries/arch.conf
+     [ -n "$ucode" ] && echo "initrd  /$ucode.img" >> /boot/loader/entries/arch.conf
+     echo 'initrd  /initramfs-linux.img' >> /boot/loader/entries/arch.conf
+     echo "options root=UUID=[insert root UUID here] rw nowatchdog quiet" >> /boot/loader/entries/arch.conf
+elif [ "$bootloader" = "efistub" ]; then
+     [ -n "$ucode" ] && ucode_init="initrd=/$ucode.img"
+     efibootmgr -d $disk -p 1 -c -L "Arch Linux" -l /vmlinuz-linux -u "$ucode_init initrd=/initramfs-linux.img root=$root_partition rw quiet" -v
+fi
+}
+
+swap() {
 if [ -n "$swap_size" ]; then
      dd if=/dev/zero of=/swapfile bs=1GiB count=$swap_size status=progress
      chmod 600 /swapfile
@@ -13,8 +50,9 @@ if [ -n "$swap_size" ]; then
      echo "# swapfile" >> /etc/fstab
      echo "/swapfile none swap defaults 0 0" >> /etc/fstab
 fi
+}
 
-# Timezone and localization
+tzl() {
 ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 hwclock --systohc
 sed -i 's/^#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen && locale-gen
@@ -23,30 +61,37 @@ echo "$hostname" > /etc/hostname
 echo "127.0.0.1       localhost" >> /etc/hosts
 echo "::1             localhost" >> /etc/hosts
 echo "127.0.1.1       "$hostname".localdomain       "$hostname"" >> /etc/hosts
+}
+
+# Essential packages
+pacman --noconfirm -S $ucode networkmanager git vifm
+
+# Swap
+swap
+
+# Timezone and localization
+tzl
 
 # Network
 systemctl enable NetworkManager
 
 # Boot
-if [ "$bootloader" = "systemd-boot" ]; then
-     bootctl --path=/boot install
-     echo 'default arch.conf' > /boot/loader/loader.conf
-     echo 'console-mode auto' >> /boot/loader/loader.conf
-     echo 'timeout 0' >> /boot/loader/loader.conf
-     echo 'editor  0' >> /boot/loader/loader.conf
-     echo 'title   Arch Linux' > /boot/loader/entries/arch.conf
-     echo 'linux   /vmlinuz-linux' >> /boot/loader/entries/arch.conf
-     [ -n "$ucode" ] && echo "initrd  /$ucode.img" >> /boot/loader/entries/arch.conf
-     echo 'initrd  /initramfs-linux.img' >> /boot/loader/entries/arch.conf
-     echo "options rd.luks.name=[regular UUID here]=encrypted root=UUID=[encrypted UUID here] rw nowatchdog quiet" >> /boot/loader/entries/arch.conf
-elif [ "$bootloader" = "efistub" ]; then
-     [ -n "$ucode" ] && ucode_init="initrd=/$ucode.img"
-     efibootmgr -d $disk -p 1 -c -L "Arch Linux" -l /vmlinuz-linux -u "$ucode_init initrd=/initramfs-linux.img root=$root_partition rw quiet" -v
+if [ "$encrypted" = 1 ]; then 
+  e_boot
+  vim /boot/loader/entries/arch.conf
+else 
+  ne_boot
+  vim /boot/loader/entries/arch.conf
 fi
 
+
 # Silent boot
-sed -i 's/^HOOKS=(base udev/HOOKS=(base systemd/g' /etc/mkinitcpio.conf
-sed -i 's/modconf block/modconf block sd-encrypt/g' /etc/mkinitcpio.conf
+if [ "$bootloader" = "systemd-boot" ]; then
+   if [ "$encrypted" = 1 ]; then
+   sed -i 's/modconf block/modconf block sd-encrypt/g' /etc/mkinitcpio.conf
+   fi
+sed -i 's/^HOOKS=(base udev/HOOKS=(base systemd udev/g' /etc/mkinitcpio.conf
+fi
 sed -i 's/^#COMPRESSION="lz4"/COMPRESSION="lz4"/g' /etc/mkinitcpio.conf
 sed -i '67iCOMPRESSION_OPTIONS="-9"' /etc/mkinitcpio.conf
 vim /etc/mkinitcpio.conf

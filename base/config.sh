@@ -4,6 +4,7 @@
 # | Options |
 # +---------+
 erase_disk=0
+encryption=1 # set to 0 for no disk encryption
 disk='/dev/nvme0n1'
 boot_partition="${disk}p1"
 root_partition="${disk}p2"
