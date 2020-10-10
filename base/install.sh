@@ -10,32 +10,6 @@ fi
 vim ./config.sh
 source ./config.sh
 
-# +-----------+
-# | Functions |
-# +-----------+
-
-encrypt() {
-  modprobe dm-mod dm-crypt && cryptsetup luksFormat -v -s 512 -h sha512 "$root_partition" && cryptsetup open "$root_partition" encrypted
-}
-
-# Format encrypted partition & mount file systems
-
-e_mount() {
-  mkfs.ext4 "$encrypted_partition"
-  mount "$encrypted_partition" /mnt
-  mkdir /mnt/boot
-  mount "$boot_partition" /mnt/boot
-}
-
-# Format root partition & mount file systems
-
-ne_mount() {
-  mkfs.ext4 "$root_partition"
-  mount "$root_partition" /mnt
-  mkdir /mnt/boot
-  mount "$boot_partition" /mnt/boot
-}
-
 # +------------------+
 # | Pre-installation |
 # +------------------+
@@ -72,11 +46,17 @@ sleep 5
 mkfs.fat -F32 "$boot_partition"
 
 # Set up encryption
-if [ "$encryption" -eq 1 ]; then  
-  encrypt
-else 
-  ne_encrypt
-fi
+modprobe dm-crypt dm-mod
+cryptsetup luksFormat -v -s 512 -h sha512 "$root_partition"
+cryptsetup open "$root_partition" encrypted
+
+# Format encrypted partition
+mkfs.ext4 "$encrypted_partition"
+
+# Mount the file systems
+mount "$encrypted_partition" /mnt
+mkdir /mnt/boot
+mount "$boot_partition" /mnt/boot
 
 # +--------------+
 # | Installation |
