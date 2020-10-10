@@ -74,15 +74,7 @@ cat /etc/pacman.d/mirrorlist
 rm /etc/pacman.d/mirrorlist.backup
 
 # Install base packages
-pacstrap /mnt base linux linux-firmware base-devel linux-headers alsa-utils
-capitaine-cursors ccache cpupower cronie discord dunst earlyoom exa feh firefox
-firetools flex geeqie go gparted gufw htop khal lxappearance lxsession moc
-man-db man-pages openssh otf-hermit pamixer pandoc pavucontrol powertop
-qalculate-gtk redshift ripgrep termdown thunderbird transmission-gtk tree
-ttf-font-awesome udiskie unclutter gvim vim-ultisnips wget xdg-user-dirs
-xorg-xinit xorg-font-util xorg-fonts-100dpi xorg-fonts-75dpi xorg-server-devel
-xorg-xbacklight xorg-xev xorg-xfontsel xorg-xinit xorg-xinput xorg-xsetroot
-xorg-server zenity zsh pulseaudio-alsa
+pacstrap /mnt base linux linux-firmware base-devel linux-headers alsa-utils capitaine-cursors ccache cpupower cronie discord dunst earlyoom exa feh firefox firetools flex geeqie go gparted gufw htop khal lxappearance lxsession moc man-db man-pages openssh otf-hermit pamixer pandoc pavucontrol powertop qalculate-gtk redshift ripgrep termdown thunderbird transmission-gtk tree ttf-font-awesome udiskie unclutter gvim vim-ultisnips wget xdg-user-dirs xorg-font-util xorg-fonts-100dpi xorg-fonts-75dpi xorg-server-devel xorg-xbacklight xorg-xev xorg-xfontsel xorg-xinit xorg-xinput xorg-xsetroot xorg-server zenity zsh pulseaudio-alsa
 
 # +----------------------+
 # | Configure the system |

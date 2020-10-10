@@ -45,7 +45,7 @@ elif [ "$bootloader" = "efistub" ]; then
 fi
 
 # Silent boot
-sed -i 's/^HOOKS=(base udev/HOOKS=(base systemd/g' /etc/mkinitcpio.conf
+sed -i 's/^HOOKS=(base udev/HOOKS=(base systemd udev/g' /etc/mkinitcpio.conf
 sed -i 's/modconf block/modconf block sd-encrypt/g' /etc/mkinitcpio.conf
 sed -i 's/^#COMPRESSION="lz4"/COMPRESSION="lz4"/g' /etc/mkinitcpio.conf
 sed -i '67iCOMPRESSION_OPTIONS="-9"' /etc/mkinitcpio.conf
@@ -63,9 +63,10 @@ sed -i 's/-march=x86_64 -mtune=generic/-march=native/g' /etc/makepkg.conf
 sed -i 's/^#MAKEFLAGS="-j2"/MAKEFLAGS="-j$(nproc)"/g' /etc/makepkg.conf
 
 # Users
+echo "Please enter the password for root: "
 passwd
 useradd -m -G wheel -s /bin/zsh -c "$fullname" "$username"
-echo "Please enter the password for "$username":"
+echo "Please enter the password for "$username": "
 passwd "$username"
 
 # Allow users in group wheel to use sudo
